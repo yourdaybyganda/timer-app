@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #FAF8F5;
+  --surface: #FFFFFF;
+  --text:    #1A1A1A;
+  --muted:   #8A8580;
+  --accent:  #B89C7D;
+  --amber:   #C9964A;
+  --red:     #B85C5C;
+  --border:  #E8E3DC;
+  --shadow:  0 2px 24px rgba(0,0,0,0.06);
+  --ease:    200ms ease;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse at 50% 30%, #FFFFFF 0%, #FAF8F5 70%);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 40px 24px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-title {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  user-select: none;
+}
+
+.popout-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 5px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  transition: border-color var(--ease), color var(--ease);
+}
+.popout-btn:hover { border-color: var(--accent); color: var(--accent); }
+.popout-btn svg   { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* Hide pop-out button when already in popup */
+body.is-popup .popout-btn { display: none; }
+
+/* ─── Countdown display ──────────────────────────────────────────────────── */
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.countdown {
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-size: clamp(56px, 14vw, 88px);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  text-shadow: 0 1px 12px rgba(184,156,125,0.25);
+  transition: color var(--ease);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  text-align: center;
+}
+.countdown.amber { color: var(--amber); }
+.countdown.red   { color: var(--red);   }
+
+/* Duration input — three editable fields */
+.duration-input {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: 'Courier Prime', monospace;
+  font-size: clamp(56px, 14vw, 88px);
+  letter-spacing: 0.03em;
+}
+
+.dur-field {
+  width: 2.2ch;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid transparent;
+  text-align: center;
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text);
+  outline: none;
+  padding: 0 1px;
+  transition: border-color var(--ease);
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.dur-field::-webkit-outer-spin-button,
+.dur-field::-webkit-inner-spin-button { -webkit-appearance: none; }
+.dur-field:focus { border-bottom-color: var(--accent); }
+
+.dur-sep {
+  color: var(--muted);
+  line-height: 1;
+  margin-bottom: 6px;
+  user-select: none;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  min-height: 18px;
+}
+
+/* ─── Controls ───────────────────────────────────────────────────────────── */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn {
+  padding: 9px 28px;
+  border-radius: 50px;
+  border: 1.5px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--ease), color var(--ease), transform 100ms ease, opacity var(--ease);
+  letter-spacing: 0.02em;
+}
+.btn:hover   { background: var(--accent); color: #fff; }
+.btn:active  { transform: scale(0.97); }
+.btn:disabled { opacity: 0.35; pointer-events: none; }
+
+.btn-muted { border-color: var(--border); color: var(--muted); }
+.btn-muted:hover { background: var(--border); color: var(--text); }
+
+/* ─── Card ───────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+/* ─── Reminder rows ──────────────────────────────────────────────────────── */
+#reminders { display: flex; flex-direction: column; }
+
+.reminder-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  transition: opacity var(--ease);
+}
+.reminder-row:last-child { border-bottom: none; }
+.reminder-row.invalid { opacity: 0.35; }
+.reminder-row.invalid .rm-time-input { pointer-events: none; }
+
+.rm-check {
+  appearance: none; -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background var(--ease), border-color var(--ease);
+  position: relative;
+}
+.rm-check:checked { background: var(--accent); border-color: var(--accent); }
+.rm-check:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 5px; height: 10px;
+  border: 2px solid #fff;
+  border-top: none; border-left: none;
+  transform: rotate(40deg);
+}
+
+.rm-prefix { font-size: 13px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
+
+.rm-time-input {
+  width: 54px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Courier Prime', monospace;
+  font-size: 14px;
+  color: var(--text);
+  text-align: center;
+  padding: 3px 6px;
+  outline: none;
+  transition: border-color var(--ease);
+  flex-shrink: 0;
+}
+.rm-time-input:focus { border-color: var(--accent); }
+
+.rm-suffix {
+  font-size: 13px;
+  color: var(--muted);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rm-delete {
+  background: none; border: none; cursor: pointer;
+  color: var(--border); padding: 2px 4px; border-radius: 4px;
+  display: flex; align-items: center;
+  transition: color var(--ease); flex-shrink: 0;
+}
+.rm-delete:hover { color: var(--red); }
+.rm-delete svg { width: 14px; height: 14px; }
+
+.add-reminder-btn {
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: 1.5px dashed var(--border); border-radius: 10px;
+  color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 13px;
+  padding: 9px 14px; cursor: pointer; width: 100%;
+  transition: border-color var(--ease), color var(--ease);
+}
+.add-reminder-btn:hover { border-color: var(--accent); color: var(--accent); }
+.add-reminder-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ─── Voice ──────────────────────────────────────────────────────────────── */
+.voice-row { display: flex; gap: 8px; align-items: center; }
+
+.voice-select {
+  flex: 1; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; padding: 7px 10px; outline: none; cursor: pointer;
+  transition: border-color var(--ease);
+}
+.voice-select:focus { border-color: var(--accent); }
+
+.test-voice-btn {
+  padding: 7px 14px; border-radius: 8px; border: 1.5px solid var(--accent);
+  background: transparent; color: var(--accent); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: background var(--ease), color var(--ease); flex-shrink: 0;
+}
+.test-voice-btn:hover, .test-voice-btn.speaking { background: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <span class="app-title">Timer</span>
+    <button class="popout-btn" id="popout-btn" title="Open in small window">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+        <rect x="1" y="4" width="10" height="10" rx="1.5"/>
+        <path d="M7 1h8v8M9 7l6-6"/>
+      </svg>
+      Pop out
+    </button>
+  </div>
+
+  <!-- ─── Countdown / duration input ─────────────────────────────────────── -->
+  <div class="hero">
+    <div class="countdown" id="countdown" style="display:none">00:00</div>
+    <div class="duration-input" id="dur-input">
+      <input class="dur-field" id="dur-h" type="number" min="0" max="23" value="0"  tabindex="1" aria-label="Hours">
+      <span class="dur-sep">:</span>
+      <input class="dur-field" id="dur-m" type="number" min="0" max="59" value="15" tabindex="2" aria-label="Minutes">
+      <span class="dur-sep">:</span>
+      <input class="dur-field" id="dur-s" type="number" min="0" max="59" value="0"  tabindex="3" aria-label="Seconds">
+    </div>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <!-- ─── Controls ────────────────────────────────────────────────────────── -->
+  <div class="controls">
+    <button class="btn"           id="btn-start">Start</button>
+    <button class="btn btn-muted" id="btn-pause" style="display:none">Pause</button>
+    <button class="btn btn-muted" id="btn-reset">Reset</button>
+  </div>
+
+  <!-- ─── Reminders ───────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="section-label">Voice reminders</div>
+    <div id="reminders"></div>
+    <button class="add-reminder-btn" id="add-reminder">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+        <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+      </svg>
+      Add reminder
+    </button>
+  </div>
+
+  <!-- ─── Voice ────────────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="section-label">Voice</div>
+    <div class="voice-row">
+      <select class="voice-select" id="voice-select">
+        <option value="">Default voice</option>
+      </select>
+      <button class="test-voice-btn" id="test-voice-btn">Test</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let state        = 'idle';
+let totalSeconds = 0;
+let remaining    = 0;
+let tickInterval = null;
+let announced    = new Set();
+
+let reminders = [
+  { seconds: 300, enabled: true },
+  { seconds: 120, enabled: true },
+  { seconds: 60,  enabled: true },
+  { seconds: 30,  enabled: true },
+];
+
+// ─── Elements ─────────────────────────────────────────────────────────────────
+const durH        = document.getElementById('dur-h');
+const durM        = document.getElementById('dur-m');
+const durS        = document.getElementById('dur-s');
+const durInput    = document.getElementById('dur-input');
+const countdownEl = document.getElementById('countdown');
+const hintEl      = document.getElementById('hint');
+const btnStart    = document.getElementById('btn-start');
+const btnPause    = document.getElementById('btn-pause');
+const btnReset    = document.getElementById('btn-reset');
+const remContainer= document.getElementById('reminders');
+const addBtn      = document.getElementById('add-reminder');
+const voiceSelect = document.getElementById('voice-select');
+const testVoiceBtn= document.getElementById('test-voice-btn');
+
+// ─── Persistence ─────────────────────────────────────────────────────────────
+function save() {
+  try {
+    localStorage.setItem('timer_h',         durH.value);
+    localStorage.setItem('timer_m',         durM.value);
+    localStorage.setItem('timer_s',         durS.value);
+    localStorage.setItem('timer_reminders', JSON.stringify(reminders));
+    localStorage.setItem('timer_voice',     voiceSelect.value);
+  } catch {}
+}
+
+function load() {
+  try {
+    const h = localStorage.getItem('timer_h'); if (h) durH.value = h;
+    const m = localStorage.getItem('timer_m'); if (m) durM.value = m;
+    const s = localStorage.getItem('timer_s'); if (s) durS.value = s;
+    const rm = localStorage.getItem('timer_reminders');
+    if (rm) reminders = JSON.parse(rm);
+    const voice = localStorage.getItem('timer_voice');
+    if (voice) voiceSelect.value = voice;
+  } catch {}
+}
+
+// ─── Duration helpers ─────────────────────────────────────────────────────────
+function padTwo(n) { return String(n).padStart(2, '0'); }
+
+function capField(el) {
+  el.value = padTwo(Math.max(0, Math.min(parseInt(el.value, 10) || 0, parseInt(el.max, 10))));
+}
+
+function getDurationSeconds() {
+  return (parseInt(durH.value, 10) || 0) * 3600
+       + (parseInt(durM.value, 10) || 0) * 60
+       + (parseInt(durS.value, 10) || 0);
+}
+
+function updateHint() {
+  if (state === 'idle') {
+    const total = getDurationSeconds();
+    hintEl.textContent = total === 0 ? 'Set a duration to begin' : '';
+    btnStart.disabled  = total === 0;
+  } else {
+    hintEl.textContent = '';
+  }
+}
+
+[durH, durM, durS].forEach(el => {
+  el.addEventListener('focus', () => el.select());
+  el.addEventListener('blur',  () => { capField(el); updateHint(); validateReminders(); save(); });
+  el.addEventListener('input', () => { updateHint(); if (state === 'running') pauseTimer(); });
+});
+durH.addEventListener('keydown', e => { if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); durM.focus(); } });
+durM.addEventListener('keydown', e => { if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); durS.focus(); } });
+
+// ─── Display ─────────────────────────────────────────────────────────────────
+function formatTime(secs) {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  return totalSeconds >= 3600
+    ? `${padTwo(h)}:${padTwo(m)}:${padTwo(s)}`
+    : `${padTwo(m)}:${padTwo(s)}`;
+}
+
+function renderDisplay() {
+  if (state !== 'idle') {
+    durInput.style.display    = 'none';
+    countdownEl.style.display = 'block';
+    countdownEl.textContent   = formatTime(remaining);
+    countdownEl.classList.remove('amber', 'red');
+    if      (remaining <= 30)  countdownEl.classList.add('red');
+    else if (remaining <= 120) countdownEl.classList.add('amber');
+  } else {
+    durInput.style.display    = 'flex';
+    countdownEl.style.display = 'none';
+    countdownEl.classList.remove('amber', 'red');
+  }
+  updateHint();
+  validateReminders();
+}
+
+// ─── Timer ───────────────────────────────────────────────────────────────────
+function startTimer() {
+  if (state === 'done') return;
+  if (state === 'idle') {
+    totalSeconds = getDurationSeconds();
+    if (totalSeconds === 0) return;
+    remaining = totalSeconds;
+    announced.clear();
+  }
+  state = 'running';
+  btnStart.style.display = 'none';
+  btnPause.style.display = 'inline-block';
+  tickInterval = setInterval(tick, 1000);
+  renderDisplay();
+  save();
+}
+
+function pauseTimer() {
+  if (state !== 'running') return;
+  clearInterval(tickInterval);
+  state = 'paused';
+  btnStart.textContent   = 'Resume';
+  btnStart.style.display = 'inline-block';
+  btnPause.style.display = 'none';
+  renderDisplay();
+  save();
+}
+
+function resetTimer() {
+  clearInterval(tickInterval);
+  speechSynthesis.cancel();
+  state = 'idle'; totalSeconds = 0; remaining = 0;
+  announced.clear();
+  btnStart.textContent   = 'Start';
+  btnStart.style.display = 'inline-block';
+  btnStart.disabled      = false;
+  btnPause.style.display = 'none';
+  renderDisplay();
+  save();
+}
+
+function tick() {
+  if (remaining <= 0) {
+    clearInterval(tickInterval);
+    state = 'done'; remaining = 0;
+    renderDisplay();
+    btnStart.style.display = 'none';
+    btnPause.style.display = 'none';
+    fireAlarm();
+    return;
+  }
+  remaining--;
+  renderDisplay();
+  checkMilestones();
+}
+
+// ─── Reminders ────────────────────────────────────────────────────────────────
+function announceLabel(secs) {
+  if (secs >= 60) {
+    const m = Math.floor(secs / 60), s = secs % 60;
+    if (s === 0) return `${m} minute${m !== 1 ? 's' : ''} remaining`;
+    return `${m} minute${m !== 1 ? 's' : ''} and ${s} second${s !== 1 ? 's' : ''} remaining`;
+  }
+  return `${secs} second${secs !== 1 ? 's' : ''} remaining`;
+}
+
+function toMMSS(secs) {
+  return `${padTwo(Math.floor(secs / 60))}:${padTwo(secs % 60)}`;
+}
+
+function parseTime(str) {
+  str = str.trim();
+  if (str.includes(':')) {
+    const [m, s] = str.split(':');
+    return Math.max(0, (parseInt(m, 10) || 0) * 60 + (parseInt(s, 10) || 0));
+  }
+  return Math.max(0, (parseInt(str, 10) || 0) * 60);
+}
+
+function renderReminders() {
+  remContainer.innerHTML = '';
+  reminders.forEach((rm, i) => {
+    const row = document.createElement('div');
+    row.className = 'reminder-row';
+
+    const check = document.createElement('input');
+    check.type = 'checkbox'; check.className = 'rm-check'; check.checked = rm.enabled;
+    check.addEventListener('change', () => { reminders[i].enabled = check.checked; save(); });
+
+    const prefix = document.createElement('span');
+    prefix.className = 'rm-prefix'; prefix.textContent = 'at';
+
+    const timeInput = document.createElement('input');
+    timeInput.type = 'text'; timeInput.className = 'rm-time-input';
+    timeInput.value = toMMSS(rm.seconds);
+    timeInput.setAttribute('aria-label', 'Reminder time (MM:SS)');
+    timeInput.addEventListener('focus', () => timeInput.select());
+    timeInput.addEventListener('keydown', e => { if (e.key === 'Enter') timeInput.blur(); });
+    timeInput.addEventListener('blur', () => {
+      const secs = Math.min(parseTime(timeInput.value), 5999);
+      reminders[i].seconds = secs;
+      timeInput.value = toMMSS(secs);
+      suffix.textContent = '— ' + announceLabel(secs);
+      validateReminders();
+      save();
+    });
+
+    const suffix = document.createElement('span');
+    suffix.className = 'rm-suffix';
+    suffix.textContent = '— ' + announceLabel(rm.seconds);
+
+    const del = document.createElement('button');
+    del.className = 'rm-delete'; del.title = 'Remove';
+    del.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+      <line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>`;
+    del.addEventListener('click', () => { reminders.splice(i, 1); renderReminders(); save(); });
+
+    row.append(check, prefix, timeInput, suffix, del);
+    remContainer.appendChild(row);
+  });
+  validateReminders();
+}
+
+function validateReminders() {
+  const total = totalSeconds > 0 ? totalSeconds : getDurationSeconds();
+  remContainer.querySelectorAll('.reminder-row').forEach((row, i) => {
+    row.classList.toggle('invalid', total > 0 && reminders[i]?.seconds >= total);
+  });
+}
+
+function checkMilestones() {
+  reminders.forEach((rm, i) => {
+    const key = `rm-${i}-${rm.seconds}`;
+    if (!announced.has(key) && rm.enabled && remaining === rm.seconds && rm.seconds < totalSeconds) {
+      announced.add(key);
+      speak(announceLabel(rm.seconds));
+    }
+  });
+}
+
+addBtn.addEventListener('click', () => {
+  const suggestion = totalSeconds > 0 ? Math.floor(totalSeconds / 2) : 60;
+  reminders.push({ seconds: suggestion, enabled: true });
+  renderReminders();
+  save();
+  remContainer.querySelectorAll('.rm-time-input').item(reminders.length - 1)?.focus();
+});
+
+// ─── Speech ──────────────────────────────────────────────────────────────────
+function populateVoices() {
+  voiceSelect.innerHTML = '<option value="">Default voice</option>';
+  speechSynthesis.getVoices().forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
+    voiceSelect.appendChild(opt);
+  });
+  const saved = localStorage.getItem('timer_voice');
+  if (saved) voiceSelect.value = saved;
+}
+speechSynthesis.addEventListener('voiceschanged', populateVoices);
+populateVoices();
+voiceSelect.addEventListener('change', save);
+
+testVoiceBtn.addEventListener('click', () => {
+  testVoiceBtn.textContent = '…';
+  testVoiceBtn.classList.add('speaking');
+  speakWithRecovery('5 minutes remaining', () => {
+    testVoiceBtn.textContent = 'Test';
+    testVoiceBtn.classList.remove('speaking');
+  });
+});
+
+function speak(text) {
+  speakWithRecovery(text);
+}
+
+/**
+ * Chrome bug workaround: speechSynthesis can silently pause after the page
+ * has been open a while. resume() + a 50ms gap after cancel() fixes it.
+ */
+function speakWithRecovery(text, onDone) {
+  const ss = window.speechSynthesis;
+  ss.resume();   // un-pause if Chrome froze it
+  ss.cancel();   // stop anything already playing
+
+  setTimeout(() => {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate   = 0.95;
+    utt.pitch  = 1;
+    utt.volume = 1;
+
+    const name = voiceSelect.value;
+    if (name) {
+      const voice = ss.getVoices().find(v => v.name === name);
+      if (voice) utt.voice = voice;
+    }
+
+    utt.onend   = () => onDone && onDone();
+    utt.onerror = () => onDone && onDone();
+
+    ss.speak(utt);
+  }, 50);
+}
+
+function fireAlarm() {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = 528;
+    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
+    osc.start(); osc.stop(ctx.currentTime + 2);
+  } catch {}
+}
+
+// ─── Controls ─────────────────────────────────────────────────────────────────
+btnStart.addEventListener('click', startTimer);
+btnPause.addEventListener('click', pauseTimer);
+btnReset.addEventListener('click', resetTimer);
+
+// ─── Pop-out ─────────────────────────────────────────────────────────────────
+if (new URLSearchParams(location.search).has('popup')) {
+  document.body.classList.add('is-popup');
+} else {
+  document.getElementById('popout-btn').addEventListener('click', () => {
+    const w = 400, h = 700;
+    const left = Math.round(screen.width  / 2 - w / 2);
+    const top  = Math.round(screen.height / 2 - h / 2);
+    window.open(
+      location.pathname + '?popup=1',
+      'timer-popup',
+      `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no`
+    );
+  });
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+load();
+renderReminders();
+renderDisplay();
+</script>
+</body>
+</html>
