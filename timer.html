@@ -557,4 +557,54 @@ function fireAlarm() {
     const ctx = window._actx || new (window.AudioContext || window.webkitAudioContext)();
     ctx.resume();
     const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.connect(gain); gain.connect(
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine'; osc.frequency.value = 528;
+    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
+    osc.start(); osc.stop(ctx.currentTime + 2);
+  } catch {}
+}
+
+// ─── Float on top (Document Picture-in-Picture) + fallback ───────────────────
+let pipWin = null;
+async function floatOnTop() {
+  unlockAudio();
+  if ('documentPictureInPicture' in window) {
+    try {
+      if (pipWin) { try { pipWin.focus(); } catch {} return; }
+      pipWin = await documentPictureInPicture.requestWindow({ width: 340, height: 360 });
+      document.querySelectorAll('style, link[rel="stylesheet"], link[rel="preconnect"]')
+        .forEach(n => pipWin.document.head.appendChild(n.cloneNode(true)));
+      pipWin.document.body.classList.add('is-popup');
+      pipWin.document.body.appendChild(surfaceEl);
+      returnNote.style.display = 'flex';
+      pipWin.addEventListener('pagehide', returnFromPip);
+      return;
+    } catch (err) { pipWin = null; }
+  }
+  const w = 360, h = 420;
+  window.open(location.pathname + '?popup=1', 'timer-popup',
+    `width=${w},height=${h},left=${Math.round(screen.width/2-w/2)},top=${Math.round(screen.height/2-h/2)},resizable=yes`);
+}
+function returnFromPip() {
+  if (surfaceEl.ownerDocument !== document) document.body.appendChild(surfaceEl);
+  returnNote.style.display = 'none'; pipWin = null;
+}
+popoutBtn.addEventListener('click', floatOnTop);
+bringBack.addEventListener('click', () => { if (pipWin) { try { pipWin.close(); } catch { returnFromPip(); } } });
+
+// ─── Cross-window sync ──────────────────────────────────────────────────────
+function pullShared() { loadStore(); syncFieldsFromState(); populateVoices(); renderReminders(); paint(); }
+if (bc) bc.onmessage = (e) => { if (e.data && e.data.type === 'sync') pullShared(); };
+window.addEventListener('storage', (e) => { if (e.key === STORE_KEY) pullShared(); });
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+if (IS_POPUP) document.body.classList.add('is-popup');
+loadStore();
+syncFieldsFromState();
+populateVoices();
+renderReminders();
+paint();
+</script>
+</body>
+</html>
