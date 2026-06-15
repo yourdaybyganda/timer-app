@@ -6,279 +6,238 @@
 <title>Timer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:      #FAF8F5;
-  --surface: #FFFFFF;
-  --text:    #1A1A1A;
-  --muted:   #8A8580;
-  --accent:  #B89C7D;
-  --amber:   #C9964A;
-  --red:     #B85C5C;
-  --border:  #E8E3DC;
-  --shadow:  0 2px 24px rgba(0,0,0,0.06);
-  --ease:    200ms ease;
+  --bg: #FAF8F5; --surface: #FFFFFF; --text: #1A1A1A; --muted: #8A8580;
+  --accent: #B89C7D; --amber: #C9964A; --red: #B85C5C; --border: #E8E3DC;
+  --shadow: 0 2px 24px rgba(0,0,0,0.06); --ease: 200ms ease;
 }
 
 html, body {
   min-height: 100%;
   background: var(--bg);
-  background-image: radial-gradient(ellipse at 50% 30%, #FFFFFF 0%, #FAF8F5 70%);
-  color: var(--text);
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-weight: 400;
-  font-size: 15px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(ellipse at 50% 20%, #FFFFFF 0%, #FAF8F5 70%);
+  color: var(--text); font-family: 'DM Sans', system-ui, sans-serif;
+  font-weight: 400; font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
 }
 
-.app {
-  max-width: 460px;
-  margin: 0 auto;
-  padding: 40px 24px 56px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
+.app { max-width: 480px; margin: 0 auto; padding: 36px 22px 56px;
+  display: flex; flex-direction: column; gap: 20px; }
 
-/* ─── Header ─────────────────────────────────────────────────────────────── */
 .header { display: flex; align-items: center; justify-content: space-between; }
-
-.app-title {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
-  color: var(--muted); user-select: none;
-}
+.app-title { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; color: var(--muted); user-select: none; }
 
 .popout-btn {
   background: none; border: 1.5px solid var(--border); border-radius: 8px;
-  color: var(--muted); padding: 5px 10px; cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  font-family: 'DM Sans', sans-serif; font-size: 12px;
-  transition: border-color var(--ease), color var(--ease); flex-shrink: 0;
+  color: var(--muted); padding: 6px 12px; cursor: pointer; display: flex;
+  align-items: center; gap: 6px; font-family: 'DM Sans', sans-serif; font-size: 12px;
+  font-weight: 500; transition: border-color var(--ease), color var(--ease); flex-shrink: 0;
 }
 .popout-btn:hover { border-color: var(--accent); color: var(--accent); }
-.popout-btn svg   { width: 13px; height: 13px; flex-shrink: 0; }
+.popout-btn svg { width: 13px; height: 13px; }
 
-/* ─── Countdown ──────────────────────────────────────────────────────────── */
-.hero { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.return-note {
+  display: none; align-items: center; justify-content: center; gap: 6px;
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
+  padding: 16px; font-size: 13px; color: var(--muted); text-align: center;
+}
+.return-note b { color: var(--accent); cursor: pointer; text-decoration: underline; }
+
+.audio-notice {
+  display: none; align-items: center; justify-content: center; gap: 8px;
+  background: #FBF4E8; border: 1px solid #EAD9B8; color: #8A6D3B;
+  border-radius: 10px; padding: 8px 12px; font-size: 12px; cursor: pointer; text-align: center;
+}
+.audio-notice.show { display: flex; }
+
+/* ─── Timer card ──────────────────────────────────────────────────────────── */
+.timer-card {
+  background: var(--surface); border-radius: 18px; box-shadow: var(--shadow);
+  padding: 22px 20px; display: flex; flex-direction: column; gap: 16px;
+}
+
+.timer-display { display: flex; justify-content: center; align-items: center; min-height: 84px; }
 
 .countdown {
-  font-family: 'Courier Prime', 'Courier New', monospace;
-  font-size: clamp(56px, 14vw, 88px); font-weight: 400; letter-spacing: 0.05em;
-  color: var(--text); text-shadow: 0 1px 12px rgba(184,156,125,0.25);
+  font-family: 'Courier Prime', monospace; font-size: clamp(50px, 13vw, 74px);
+  letter-spacing: 0.04em; color: var(--text); user-select: none; text-align: center;
   transition: color var(--ease); font-variant-numeric: tabular-nums;
-  user-select: none; text-align: center;
 }
 .countdown.amber { color: var(--amber); }
-.countdown.red   { color: var(--red);   }
+.countdown.red { color: var(--red); }
+.countdown .seg { white-space: nowrap; }
+.countdown .seg + .seg { margin-left: 0.16em; }
+.countdown b { font-weight: 400; }
+.countdown i {
+  font-family: 'DM Sans', sans-serif; font-style: normal; font-weight: 600;
+  font-size: 0.26em; letter-spacing: 0.04em; color: var(--accent); margin-left: 0.06em;
+}
 
 .duration-input {
   display: flex; align-items: center; gap: 2px;
-  font-family: 'Courier Prime', monospace;
-  font-size: clamp(56px, 14vw, 88px); letter-spacing: 0.03em;
+  font-family: 'Courier Prime', monospace; font-size: clamp(50px, 13vw, 74px); letter-spacing: 0.03em;
 }
-
 .dur-field {
-  width: 2.2ch; background: transparent; border: none;
-  border-bottom: 1.5px solid transparent; text-align: center;
-  font-family: inherit; font-size: inherit; color: var(--text);
+  width: 2.2ch; background: transparent; border: none; border-bottom: 1.5px solid transparent;
+  text-align: center; font-family: inherit; font-size: inherit; color: var(--text);
   outline: none; padding: 0 1px; transition: border-color var(--ease);
   font-variant-numeric: tabular-nums; -moz-appearance: textfield;
 }
-.dur-field::-webkit-outer-spin-button,
-.dur-field::-webkit-inner-spin-button { -webkit-appearance: none; }
+.dur-field::-webkit-outer-spin-button, .dur-field::-webkit-inner-spin-button { -webkit-appearance: none; }
 .dur-field:focus { border-bottom-color: var(--accent); }
-
-.dur-sep { color: var(--muted); line-height: 1; margin-bottom: 6px; user-select: none; }
-
-.hint { font-size: 12px; color: var(--muted); text-align: center; min-height: 18px; }
-
-/* Next reminder pill — shown in popup */
-.next-reminder {
-  font-size: 12px; color: var(--muted); background: var(--surface);
-  border: 1px solid var(--border); border-radius: 50px; padding: 4px 14px;
-  text-align: center; display: none;
+.dur-unit {
+  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.26em;
+  color: var(--accent); margin: 0 6px 0 1px; align-self: flex-end; padding-bottom: 0.5em;
 }
-.next-reminder span { color: var(--accent); font-weight: 500; }
 
-/* ─── Controls ───────────────────────────────────────────────────────────── */
-.controls { display: flex; justify-content: center; gap: 12px; }
+.next-reminder { font-size: 12px; color: var(--muted); text-align: center; }
+.next-reminder span { color: var(--accent); font-weight: 600; }
 
+.controls { display: flex; justify-content: center; gap: 10px; }
 .btn {
-  padding: 9px 28px; border-radius: 50px; border: 1.5px solid var(--accent);
-  background: transparent; color: var(--accent);
-  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer;
+  padding: 9px 26px; border-radius: 50px; border: 1.5px solid var(--accent);
+  background: transparent; color: var(--accent); font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500; cursor: pointer; letter-spacing: 0.02em;
   transition: background var(--ease), color var(--ease), transform 100ms ease, opacity var(--ease);
-  letter-spacing: 0.02em;
 }
-.btn:hover   { background: var(--accent); color: #fff; }
-.btn:active  { transform: scale(0.97); }
+.btn:hover { background: var(--accent); color: #fff; }
+.btn:active { transform: scale(0.97); }
 .btn:disabled { opacity: 0.35; pointer-events: none; }
-
 .btn-muted { border-color: var(--border); color: var(--muted); }
 .btn-muted:hover { background: var(--border); color: var(--text); }
 
-/* ─── Card ───────────────────────────────────────────────────────────────── */
-.card {
-  background: var(--surface); border-radius: 16px; box-shadow: var(--shadow);
-  padding: 20px 22px; display: flex; flex-direction: column; gap: 16px;
+/* ─── Reminders (main-window only) ────────────────────────────────────────── */
+.reminders-section {
+  border-top: 1px solid var(--border); padding-top: 14px;
+  display: flex; flex-direction: column; gap: 6px;
 }
-
-.section-label {
-  font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: var(--muted);
-}
-
-/* ─── Reminder rows ──────────────────────────────────────────────────────── */
-#reminders { display: flex; flex-direction: column; }
-
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; color: var(--muted); }
+.reminders { display: flex; flex-direction: column; }
 .reminder-row {
-  display: flex; align-items: center; gap: 10px; padding: 10px 0;
+  display: flex; align-items: center; gap: 9px; padding: 8px 0;
   border-bottom: 1px solid var(--border); transition: opacity var(--ease);
 }
 .reminder-row:last-child { border-bottom: none; }
 .reminder-row.invalid { opacity: 0.35; }
-.reminder-row.invalid .rm-time-input { pointer-events: none; }
-
 .rm-check {
-  appearance: none; -webkit-appearance: none; width: 18px; height: 18px;
-  border: 1.5px solid var(--border); border-radius: 5px; flex-shrink: 0;
-  cursor: pointer; transition: background var(--ease), border-color var(--ease);
-  position: relative;
+  appearance: none; -webkit-appearance: none; width: 17px; height: 17px;
+  border: 1.5px solid var(--border); border-radius: 5px; flex-shrink: 0; cursor: pointer;
+  transition: background var(--ease), border-color var(--ease); position: relative;
 }
 .rm-check:checked { background: var(--accent); border-color: var(--accent); }
 .rm-check:checked::after {
-  content: ''; position: absolute; left: 4px; top: 1px; width: 5px; height: 10px;
+  content: ''; position: absolute; left: 4px; top: 1px; width: 4px; height: 9px;
   border: 2px solid #fff; border-top: none; border-left: none; transform: rotate(40deg);
 }
-
-.rm-prefix { font-size: 13px; color: var(--muted); white-space: nowrap; flex-shrink: 0; }
-
-.rm-time-input {
-  width: 54px; background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: 8px; font-family: 'Courier Prime', monospace; font-size: 14px;
-  color: var(--text); text-align: center; padding: 3px 6px; outline: none;
+.rm-prefix { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+.hms-field {
+  display: inline-flex; align-items: center; gap: 1px; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: 7px; padding: 3px 7px;
   transition: border-color var(--ease); flex-shrink: 0;
 }
-.rm-time-input:focus { border-color: var(--accent); }
-
-.rm-suffix {
-  font-size: 13px; color: var(--muted); flex: 1; min-width: 0;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.hms-field:focus-within { border-color: var(--accent); }
+.hms-num {
+  width: 2.1ch; background: transparent; border: none; outline: none; text-align: center;
+  font-family: 'Courier Prime', monospace; font-size: 14px; color: var(--text); padding: 0;
+  -moz-appearance: textfield;
 }
-
-.rm-delete {
-  background: none; border: none; cursor: pointer; color: var(--border);
-  padding: 2px 4px; border-radius: 4px; display: flex; align-items: center;
-  transition: color var(--ease); flex-shrink: 0;
-}
+.hms-num::-webkit-outer-spin-button, .hms-num::-webkit-inner-spin-button { -webkit-appearance: none; }
+.hms-sep { color: var(--muted); font-family: 'Courier Prime', monospace; font-size: 14px; user-select: none; }
+.rm-suffix { font-size: 12px; color: var(--muted); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rm-delete { background: none; border: none; cursor: pointer; color: var(--border); padding: 2px; display: flex; transition: color var(--ease); flex-shrink: 0; }
 .rm-delete:hover { color: var(--red); }
-.rm-delete svg { width: 14px; height: 14px; }
-
+.rm-delete svg { width: 13px; height: 13px; }
 .add-reminder-btn {
-  display: flex; align-items: center; gap: 7px; background: none;
-  border: 1.5px dashed var(--border); border-radius: 10px; color: var(--muted);
-  font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 9px 14px;
-  cursor: pointer; width: 100%; transition: border-color var(--ease), color var(--ease);
+  display: flex; align-items: center; gap: 6px; background: none; border: 1.5px dashed var(--border);
+  border-radius: 9px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 12px;
+  padding: 8px 12px; cursor: pointer; margin-top: 4px; transition: border-color var(--ease), color var(--ease);
 }
 .add-reminder-btn:hover { border-color: var(--accent); color: var(--accent); }
-.add-reminder-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+.add-reminder-btn svg { width: 12px; height: 12px; }
 
-/* ─── Voice — stacked ─────────────────────────────────────────────────────── */
+/* ─── Voice ───────────────────────────────────────────────────────────────── */
+.voice-card {
+  background: var(--surface); border-radius: 16px; box-shadow: var(--shadow);
+  padding: 18px 20px; display: flex; flex-direction: column; gap: 12px;
+}
 .voice-stack { display: flex; flex-direction: column; gap: 10px; }
-
 .voice-select {
-  width: 100%; background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif;
-  font-size: 13px; padding: 8px 10px; outline: none; cursor: pointer;
-  transition: border-color var(--ease);
+  width: 100%; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px;
+  color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 10px;
+  outline: none; cursor: pointer; transition: border-color var(--ease);
 }
 .voice-select:focus { border-color: var(--accent); }
-
 .test-voice-btn {
   width: 100%; padding: 8px 0; border-radius: 8px; border: 1.5px solid var(--accent);
   background: transparent; color: var(--accent); font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 500; cursor: pointer;
-  transition: background var(--ease), color var(--ease);
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: background var(--ease), color var(--ease);
 }
-.test-voice-btn:hover,
-.test-voice-btn.speaking { background: var(--accent); color: #fff; }
+.test-voice-btn:hover, .test-voice-btn.speaking { background: var(--accent); color: #fff; }
 
-/* ─── Audio-unlock banner ─────────────────────────────────────────────────── */
-.audio-notice {
-  display: none; align-items: center; justify-content: center; gap: 8px;
-  background: #FBF4E8; border: 1px solid #EAD9B8; color: #8A6D3B;
-  border-radius: 10px; padding: 8px 12px; font-size: 12px; cursor: pointer;
-  text-align: center;
-}
-.audio-notice.show { display: flex; }
-
-/* ─── Popup mode — display only ───────────────────────────────────────────── */
+/* ─── Float / popup mode — hide setup-only bits ───────────────────────────── */
 body.is-popup .popout-btn,
-body.is-popup .card,
-body.is-popup .controls,
-body.is-popup .duration-input,
+body.is-popup .reminders-section,
+body.is-popup .voice-card,
 body.is-popup .audio-notice { display: none !important; }
-body.is-popup .next-reminder { display: block; }
-body.is-popup .app { padding: 32px 20px 40px; gap: 18px; }
+body.is-popup .app { padding: 18px 16px 26px; gap: 14px; max-width: none; }
 body.is-popup .header { justify-content: center; }
+body.is-popup .timer-card { padding: 16px; }
 </style>
 </head>
 <body>
-<div class="app">
+<div class="app" id="surface">
 
   <div class="header">
     <span class="app-title">Timer</span>
-    <button class="popout-btn" id="popout-btn">
+    <button class="popout-btn" id="popout-btn" title="Float this on top of other windows">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
-        <rect x="1" y="4" width="10" height="10" rx="1.5"/>
-        <path d="M7 1h8v8M9 7l6-6"/>
+        <rect x="1" y="4" width="10" height="10" rx="1.5"/><path d="M7 1h8v8M9 7l6-6"/>
       </svg>
-      Pop out
+      Float on top
     </button>
   </div>
 
-  <div class="hero">
-    <div class="countdown" id="countdown" style="display:none">00:00</div>
-    <div class="duration-input" id="dur-input">
-      <input class="dur-field" id="dur-h" type="number" min="0" max="23" value="0"  tabindex="1" aria-label="Hours">
-      <span class="dur-sep">:</span>
-      <input class="dur-field" id="dur-m" type="number" min="0" max="59" value="15" tabindex="2" aria-label="Minutes">
-      <span class="dur-sep">:</span>
-      <input class="dur-field" id="dur-s" type="number" min="0" max="59" value="0"  tabindex="3" aria-label="Seconds">
-    </div>
-    <div class="hint" id="hint"></div>
-    <div class="next-reminder" id="next-reminder">No upcoming reminders</div>
-  </div>
-
-  <div class="controls">
-    <button class="btn"           id="btn-start">Start</button>
-    <button class="btn btn-muted" id="btn-pause" style="display:none">Pause</button>
-    <button class="btn btn-muted" id="btn-reset">Reset</button>
-  </div>
-
+  <div class="return-note" id="return-note">Timer is floating on top — <b id="bring-back">Bring back</b></div>
   <div class="audio-notice" id="audio-notice">🔊 Click anywhere once to enable voice</div>
 
-  <div class="card">
-    <div class="section-label">Voice reminders</div>
-    <div id="reminders"></div>
-    <button class="add-reminder-btn" id="add-reminder">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
-        <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
-      </svg>
-      Add reminder
-    </button>
+  <div class="timer-card">
+    <div class="timer-display">
+      <div class="countdown" id="countdown" style="display:none"></div>
+      <div class="duration-input" id="dur-input">
+        <input class="dur-field" id="dur-h" type="number" min="0" max="23" value="00" aria-label="Hours"><span class="dur-unit">h</span>
+        <input class="dur-field" id="dur-m" type="number" min="0" max="59" value="15" aria-label="Minutes"><span class="dur-unit">m</span>
+        <input class="dur-field" id="dur-s" type="number" min="0" max="59" value="00" aria-label="Seconds"><span class="dur-unit">s</span>
+      </div>
+    </div>
+
+    <div class="next-reminder" id="next-reminder"></div>
+
+    <div class="controls">
+      <button class="btn" id="btn-start">Start</button>
+      <button class="btn btn-muted" id="btn-pause" style="display:none">Pause</button>
+      <button class="btn btn-muted" id="btn-reset">Reset</button>
+    </div>
+
+    <div class="reminders-section">
+      <div class="section-label">VOICE REMINDERS</div>
+      <div class="reminders" id="reminders"></div>
+      <button class="add-reminder-btn" id="add-reminder">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/>
+        </svg>
+        Add reminder
+      </button>
+    </div>
   </div>
 
-  <div class="card">
-    <div class="section-label">Voice</div>
+  <div class="voice-card">
+    <div class="section-label">VOICE</div>
     <div class="voice-stack">
-      <select class="voice-select" id="voice-select">
-        <option value="">Default voice</option>
-      </select>
+      <select class="voice-select" id="voice-select"><option value="">Default voice</option></select>
       <button class="test-voice-btn" id="test-voice-btn">Test voice</button>
     </div>
   </div>
@@ -289,436 +248,313 @@ body.is-popup .header { justify-content: center; }
 'use strict';
 
 // ════════════════════════════════════════════════════════════════════════════
-//  This app uses a TIMESTAMP-DRIVEN clock (not a counting setInterval), so the
-//  countdown never drifts and self-corrects after the tab is throttled/asleep.
-//  State lives in localStorage and is shared across windows via BroadcastChannel,
-//  so the pop-out window mirrors the main window instead of running a 2nd timer.
+//  Single timer. Timestamp-based clock (drift-proof, resumes after reload).
+//  "Float on top" uses the Document Picture-in-Picture API (always-on-top) when
+//  available; otherwise a normal synced pop-up. State persists to localStorage
+//  and syncs across windows via BroadcastChannel.
 // ════════════════════════════════════════════════════════════════════════════
 
-const IS_POPUP = new URLSearchParams(location.search).has('popup');
-
-// ─── Keys ─────────────────────────────────────────────────────────────────────
-const K_STATE  = 'timer_state';      // run state (shared, authoritative)
-const K_REM    = 'timer_reminders';  // reminder list
-const K_CONFIG = 'timer_config';     // duration fields + selected voice
-
-// ─── In-memory state ──────────────────────────────────────────────────────────
-// status: 'idle' | 'running' | 'paused' | 'done'
-let S = { status: 'idle', endTime: 0, pausedRemaining: 0, totalSeconds: 0, announced: [] };
-
-let reminders = [
-  { id: rid(), seconds: 300, enabled: true },
-  { id: rid(), seconds: 120, enabled: true },
-  { id: rid(), seconds: 60,  enabled: true },
-  { id: rid(), seconds: 30,  enabled: true },
-];
-
-function rid() { return 'r' + Math.random().toString(36).slice(2, 9); }
-
-// ─── Cross-window channel ─────────────────────────────────────────────────────
+const STORE_KEY = 'timer_store_v3';
+const IS_POPUP  = new URLSearchParams(location.search).has('popup');
 const bc = ('BroadcastChannel' in window) ? new BroadcastChannel('timer-sync') : null;
+const PREFERRED_VOICE = 'Google US English';
 
-// ─── Elements ─────────────────────────────────────────────────────────────────
+function uid() { return 'x' + Math.random().toString(36).slice(2, 9); }
+
+// status: 'idle' | 'running' | 'paused' | 'done'
+let S = {
+  voice: '', status: 'idle', endTime: 0, pausedRemaining: 0, totalSeconds: 0,
+  h: 0, m: 15, s: 0, announced: [],
+  reminders: [
+    { id: uid(), seconds: 300, enabled: true },
+    { id: uid(), seconds: 120, enabled: true },
+    { id: uid(), seconds: 60,  enabled: true },
+    { id: uid(), seconds: 30,  enabled: true },
+  ],
+};
+
+// ─── Captured refs (use vars, not getElementById — nodes move into the PiP doc) ─
+const surfaceEl    = document.getElementById('surface');
+const popoutBtn    = document.getElementById('popout-btn');
+const returnNote   = document.getElementById('return-note');
+const bringBack    = document.getElementById('bring-back');
+const audioNotice  = document.getElementById('audio-notice');
+const countdownEl  = document.getElementById('countdown');
+const durInput     = document.getElementById('dur-input');
 const durH         = document.getElementById('dur-h');
 const durM         = document.getElementById('dur-m');
 const durS         = document.getElementById('dur-s');
-const durInput     = document.getElementById('dur-input');
-const countdownEl  = document.getElementById('countdown');
-const hintEl       = document.getElementById('hint');
 const nextRemEl    = document.getElementById('next-reminder');
 const btnStart     = document.getElementById('btn-start');
 const btnPause     = document.getElementById('btn-pause');
 const btnReset     = document.getElementById('btn-reset');
-const remContainer = document.getElementById('reminders');
-const addBtn       = document.getElementById('add-reminder');
+const remList      = document.getElementById('reminders');
+const addReminder  = document.getElementById('add-reminder');
 const voiceSelect  = document.getElementById('voice-select');
 const testVoiceBtn = document.getElementById('test-voice-btn');
-const audioNotice  = document.getElementById('audio-notice');
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
-function persistState(broadcast = true) {
-  try { localStorage.setItem(K_STATE, JSON.stringify(S)); } catch {}
-  if (broadcast && bc) bc.postMessage({ type: 'state' });
+function readStore() {
+  try { const raw = localStorage.getItem(STORE_KEY); if (raw) return JSON.parse(raw); } catch {}
+  return null;
 }
-function persistConfig() {
-  try {
-    localStorage.setItem(K_CONFIG, JSON.stringify({
-      h: durH.value, m: durM.value, s: durS.value, voice: voiceSelect.value,
-    }));
-    localStorage.setItem(K_REM, JSON.stringify(reminders));
-  } catch {}
-  if (bc) bc.postMessage({ type: 'config' });
+function writeStore(broadcast = true) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch {}
+  if (broadcast && bc) bc.postMessage({ type: 'sync' });
 }
-
-function loadState() {
-  try {
-    const raw = localStorage.getItem(K_STATE);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        S = Object.assign({ status: 'idle', endTime: 0, pausedRemaining: 0, totalSeconds: 0, announced: [] }, parsed);
-        if (!Array.isArray(S.announced)) S.announced = [];
-      }
-    }
-  } catch {}
-}
-function loadConfig() {
-  try {
-    const cfg = JSON.parse(localStorage.getItem(K_CONFIG) || '{}');
-    if (cfg.h != null) durH.value = cfg.h;
-    if (cfg.m != null) durM.value = cfg.m;
-    if (cfg.s != null) durS.value = cfg.s;
-    if (cfg.voice != null) voiceSelect.dataset.want = cfg.voice;
-    const rm = JSON.parse(localStorage.getItem(K_REM) || 'null');
-    if (Array.isArray(rm) && rm.length) {
-      reminders = rm.map(r => ({ id: r.id || rid(), seconds: +r.seconds || 0, enabled: r.enabled !== false }));
-    }
-  } catch {}
+function loadStore() {
+  const s = readStore();
+  if (s && typeof s === 'object') {
+    S = Object.assign(S, s);
+    if (!Array.isArray(S.announced)) S.announced = [];
+    if (!Array.isArray(S.reminders)) S.reminders = [];
+  }
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Time helpers ──────────────────────────────────────────────────────────────
 function padTwo(n) { return String(n).padStart(2, '0'); }
-
-function capField(el) {
-  el.value = padTwo(Math.max(0, Math.min(parseInt(el.value, 10) || 0, parseInt(el.max, 10))));
-}
-function configuredSeconds() {
-  return (parseInt(durH.value, 10) || 0) * 3600
-       + (parseInt(durM.value, 10) || 0) * 60
-       + (parseInt(durS.value, 10) || 0);
-}
-function toMMSS(secs) { return `${padTwo(Math.floor(secs / 60))}:${padTwo(secs % 60)}`; }
-
-function formatClock(secs, total) {
-  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
-  return total >= 3600 ? `${padTwo(h)}:${padTwo(m)}:${padTwo(s)}` : `${padTwo(m)}:${padTwo(s)}`;
-}
-
-/** Live remaining seconds, derived from the timestamp (never drifts). */
+function cfgSeconds() { return (+S.h || 0) * 3600 + (+S.m || 0) * 60 + (+S.s || 0); }
 function computeRemaining() {
   if (S.status === 'running') return Math.max(0, Math.round((S.endTime - Date.now()) / 1000));
   if (S.status === 'paused')  return S.pausedRemaining;
   return 0;
 }
-
-function announceLabel(secs) {
-  if (secs >= 60) {
-    const m = Math.floor(secs / 60), s = secs % 60;
-    if (s === 0) return `${m} minute${m !== 1 ? 's' : ''} remaining`;
-    return `${m} minute${m !== 1 ? 's' : ''} and ${s} second${s !== 1 ? 's' : ''} remaining`;
-  }
-  return `${secs} second${secs !== 1 ? 's' : ''} remaining`;
+function toMMSS(secs) { return `${padTwo(Math.floor(secs / 60))}:${padTwo(secs % 60)}`; }
+function toClock(secs) {
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+  return h ? `${h}:${padTwo(m)}:${padTwo(s)}` : `${padTwo(m)}:${padTwo(s)}`;
+}
+function toUnitsText(secs) {
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+  return (h ? `${h}h ${padTwo(m)}m ` : `${m}m `) + `${padTwo(s)}s`;
+}
+function clockHTML(secs, total) {
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+  const seg = (n, u) => `<span class="seg"><b>${padTwo(n)}</b><i>${u}</i></span>`;
+  return total >= 3600 ? seg(h, 'h') + seg(m, 'm') + seg(s, 's') : seg(m, 'm') + seg(s, 's');
 }
 
+// ─── Announcements (English on-screen; spoken text follows the voice language) ─
+function announceLabel(secs) {
+  const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
+  const parts = [];
+  if (h) parts.push(`${h} hour${h !== 1 ? 's' : ''}`);
+  if (m) parts.push(`${m} minute${m !== 1 ? 's' : ''}`);
+  if (s) parts.push(`${s} second${s !== 1 ? 's' : ''}`);
+  if (!parts.length) parts.push('0 seconds');
+  const text = parts.length === 1 ? parts[0]
+    : parts.slice(0, -1).join(', ') + ' and ' + parts[parts.length - 1];
+  return text + ' remaining';
+}
+function announceText(secs) { return announceLabel(secs); } // always English
+
+// ─── Duration fields ────────────────────────────────────────────────────────────
+function syncFieldsFromState() { durH.value = padTwo(+S.h || 0); durM.value = padTwo(+S.m || 0); durS.value = padTwo(+S.s || 0); }
+function commitDuration() {
+  // Normalize across fields: e.g. 0h 130m 0s → 2h 10m 0s. Capped at 23:59:59.
+  let total = (parseInt(durH.value, 10) || 0) * 3600 + (parseInt(durM.value, 10) || 0) * 60 + (parseInt(durS.value, 10) || 0);
+  total = Math.max(0, Math.min(total, 86399));
+  S.h = Math.floor(total / 3600); S.m = Math.floor((total % 3600) / 60); S.s = total % 60;
+  syncFieldsFromState(); writeStore(); paint();
+}
+[durH, durM, durS].forEach(el => {
+  el.addEventListener('focus', () => el.select());
+  el.addEventListener('blur', commitDuration);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') el.blur(); });
+});
+
+// ─── Reminders ───────────────────────────────────────────────────────────────
 function parseTime(str) {
   str = String(str).trim();
   if (str.includes(':')) {
-    const [m, s] = str.split(':');
-    return Math.max(0, (parseInt(m, 10) || 0) * 60 + (parseInt(s, 10) || 0));
+    const p = str.split(':').map(x => parseInt(x, 10) || 0);
+    let h = 0, m = 0, s = 0;
+    if (p.length >= 3) { [h, m, s] = p; } else { [m, s] = p; }
+    return Math.max(0, h * 3600 + m * 60 + s);
   }
   return Math.max(0, (parseInt(str, 10) || 0) * 60); // plain number = minutes
 }
+function svg(p) { return `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">${p}</svg>`; }
 
-// ─── Render ───────────────────────────────────────────────────────────────────
-function render() {
-  const remaining = computeRemaining();
-  const total     = S.totalSeconds > 0 ? S.totalSeconds : configuredSeconds();
-  const active    = S.status !== 'idle';
-
-  // Countdown vs editable inputs. Popup is always display-only.
-  const showClock = IS_POPUP || active;
-  durInput.style.display    = showClock ? 'none' : 'flex';
-  countdownEl.style.display = showClock ? 'block' : 'none';
-
-  if (showClock) {
-    const shown = active ? remaining : configuredSeconds();
-    countdownEl.textContent = formatClock(shown, Math.max(total, configuredSeconds()));
-    countdownEl.classList.remove('amber', 'red');
-    if (active) {
-      if      (remaining <= 30)  countdownEl.classList.add('red');
-      else if (remaining <= 120) countdownEl.classList.add('amber');
-    }
+// Segmented HH:MM:SS editor — fixed colons, editable numbers, auto-normalizing.
+function makeHMSField(secs, onCommit) {
+  const wrap = document.createElement('span'); wrap.className = 'hms-field';
+  function commit() {
+    let total = (parseInt(ih.value, 10) || 0) * 3600 + (parseInt(im.value, 10) || 0) * 60 + (parseInt(is.value, 10) || 0);
+    total = Math.max(0, Math.min(total, 86399));
+    ih.value = padTwo(Math.floor(total / 3600));
+    im.value = padTwo(Math.floor((total % 3600) / 60));
+    is.value = padTwo(total % 60);
+    onCommit(total);
   }
-
-  // Buttons
-  if (S.status === 'running') {
-    btnStart.style.display = 'none';
-    btnPause.style.display = 'inline-block';
-  } else {
-    btnStart.style.display = 'inline-block';
-    btnPause.style.display = 'none';
-    btnStart.textContent = S.status === 'paused' ? 'Resume' : 'Start';
-    btnStart.disabled = (S.status === 'idle') && configuredSeconds() === 0;
-  }
-
-  // Hint
-  if (S.status === 'idle') {
-    hintEl.textContent = configuredSeconds() === 0 ? 'Set a duration to begin' : '';
-  } else if (S.status === 'done') {
-    hintEl.textContent = 'Time’s up';
-  } else {
-    hintEl.textContent = '';
-  }
-
-  updateNextReminder(remaining);
-  validateReminders(total);
+  const mk = (val, label) => {
+    const i = document.createElement('input');
+    i.type = 'text'; i.inputMode = 'numeric'; i.className = 'hms-num'; i.maxLength = 4;
+    i.value = padTwo(val); i.setAttribute('aria-label', label);
+    i.addEventListener('focus', () => i.select());
+    i.addEventListener('keydown', e => { if (e.key === 'Enter') i.blur(); });
+    i.addEventListener('blur', commit);
+    return i;
+  };
+  const sep = () => { const x = document.createElement('span'); x.className = 'hms-sep'; x.textContent = ':'; return x; };
+  const ih = mk(Math.floor(secs / 3600), 'Hours');
+  const im = mk(Math.floor((secs % 3600) / 60), 'Minutes');
+  const is = mk(secs % 60, 'Seconds');
+  wrap.append(ih, sep(), im, sep(), is);
+  return wrap;
 }
 
-function updateNextReminder(remaining) {
-  if (S.status === 'done') { nextRemEl.textContent = 'Timer complete'; return; }
-  const total = S.totalSeconds > 0 ? S.totalSeconds : configuredSeconds();
-  const upcoming = reminders
+function renderReminders() {
+  remList.innerHTML = '';
+  S.reminders.forEach(rm => {
+    const row = document.createElement('div'); row.className = 'reminder-row'; row.dataset.id = rm.id;
+    const check = document.createElement('input');
+    check.type = 'checkbox'; check.className = 'rm-check'; check.checked = rm.enabled;
+    check.addEventListener('change', () => { rm.enabled = check.checked; writeStore(); paint(); });
+    const prefix = document.createElement('span'); prefix.className = 'rm-prefix'; prefix.textContent = 'at';
+    const suffix = document.createElement('span'); suffix.className = 'rm-suffix'; suffix.textContent = '— ' + announceLabel(rm.seconds);
+    const field = makeHMSField(rm.seconds, (secs) => {
+      rm.seconds = secs; suffix.textContent = '— ' + announceLabel(rm.seconds); writeStore(); paint();
+    });
+    const rdel = document.createElement('button'); rdel.className = 'rm-delete'; rdel.title = 'Remove';
+    rdel.innerHTML = svg('<line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/>');
+    rdel.addEventListener('click', () => { S.reminders = S.reminders.filter(x => x.id !== rm.id); writeStore(); renderReminders(); paint(); });
+    row.append(check, prefix, field, suffix, rdel);
+    remList.appendChild(row);
+  });
+}
+addReminder.addEventListener('click', () => {
+  const base = S.totalSeconds > 0 ? S.totalSeconds : cfgSeconds();
+  S.reminders.push({ id: uid(), seconds: base > 0 ? Math.floor(base / 2) : 60, enabled: true });
+  writeStore(); renderReminders(); paint();
+  const inputs = remList.querySelectorAll('.rm-time-input'); inputs[inputs.length - 1]?.focus();
+});
+
+// ─── Paint (dynamic bits; runs each tick + on changes) ────────────────────────
+function paint() {
+  const remaining = computeRemaining();
+  const total = S.totalSeconds > 0 ? S.totalSeconds : cfgSeconds();
+  const active = S.status !== 'idle';
+
+  durInput.style.display    = active ? 'none' : 'flex';
+  countdownEl.style.display = active ? 'block' : 'none';
+  if (active) {
+    countdownEl.innerHTML = clockHTML(remaining, Math.max(total, cfgSeconds()));
+    countdownEl.classList.remove('amber', 'red');
+    if      (remaining <= 30)  countdownEl.classList.add('red');
+    else if (remaining <= 120) countdownEl.classList.add('amber');
+  }
+
+  if (S.status === 'running') { btnStart.style.display = 'none'; btnPause.style.display = ''; }
+  else {
+    btnPause.style.display = 'none'; btnStart.style.display = '';
+    btnStart.textContent = S.status === 'paused' ? 'Resume' : 'Start';
+    btnStart.disabled = (S.status === 'idle' || S.status === 'done') && cfgSeconds() === 0;
+  }
+
+  if (S.status === 'done') { nextRemEl.textContent = 'Time’s up'; return; }
+  const up = S.reminders
     .filter(rm => rm.enabled && rm.seconds < total && !S.announced.includes(rm.seconds)
                   && (S.status === 'idle' ? true : rm.seconds <= remaining))
     .sort((a, b) => b.seconds - a.seconds)[0];
-  if (upcoming) {
-    nextRemEl.innerHTML = `Next reminder at <span>${toMMSS(upcoming.seconds)}</span>`;
-  } else {
-    nextRemEl.textContent = 'No upcoming reminders';
-  }
+  nextRemEl.innerHTML = up ? `Next reminder at <span>${toUnitsText(up.seconds)}</span>` : 'No upcoming reminders';
 }
 
-function validateReminders(total) {
-  remContainer.querySelectorAll('.reminder-row').forEach((row) => {
-    const id = row.dataset.id;
-    const rm = reminders.find(r => r.id === id);
-    row.classList.toggle('invalid', total > 0 && rm && rm.seconds >= total);
-  });
-}
-
-// ─── Reminder list rendering ──────────────────────────────────────────────────
-function renderReminders() {
-  remContainer.innerHTML = '';
-  reminders.forEach((rm) => {
-    const row = document.createElement('div');
-    row.className = 'reminder-row';
-    row.dataset.id = rm.id;
-
-    const check = document.createElement('input');
-    check.type = 'checkbox'; check.className = 'rm-check'; check.checked = rm.enabled;
-    check.addEventListener('change', () => {
-      rm.enabled = check.checked; persistConfig(); render();
-    });
-
-    const prefix = document.createElement('span');
-    prefix.className = 'rm-prefix'; prefix.textContent = 'at';
-
-    const timeInput = document.createElement('input');
-    timeInput.type = 'text'; timeInput.className = 'rm-time-input';
-    timeInput.value = toMMSS(rm.seconds);
-    timeInput.setAttribute('aria-label', 'Reminder time (MM:SS)');
-    timeInput.addEventListener('focus', () => timeInput.select());
-    timeInput.addEventListener('keydown', e => { if (e.key === 'Enter') timeInput.blur(); });
-    timeInput.addEventListener('blur', () => {
-      rm.seconds = Math.min(parseTime(timeInput.value), 86399);
-      timeInput.value = toMMSS(rm.seconds);
-      suffix.textContent = '— ' + announceLabel(rm.seconds);
-      persistConfig(); render();
-    });
-
-    const suffix = document.createElement('span');
-    suffix.className = 'rm-suffix';
-    suffix.textContent = '— ' + announceLabel(rm.seconds);
-
-    const del = document.createElement('button');
-    del.className = 'rm-delete'; del.title = 'Remove';
-    del.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
-      <line x1="3" y1="3" x2="13" y2="13"/><line x1="13" y1="3" x2="3" y2="13"/></svg>`;
-    del.addEventListener('click', () => {
-      reminders = reminders.filter(r => r.id !== rm.id);
-      renderReminders(); persistConfig(); render();
-    });
-
-    row.append(check, prefix, timeInput, suffix, del);
-    remContainer.appendChild(row);
-  });
-}
-
-addBtn.addEventListener('click', () => {
-  const base = S.totalSeconds > 0 ? S.totalSeconds : configuredSeconds();
-  reminders.push({ id: rid(), seconds: base > 0 ? Math.floor(base / 2) : 60, enabled: true });
-  renderReminders(); persistConfig(); render();
-  const inputs = remContainer.querySelectorAll('.rm-time-input');
-  inputs[inputs.length - 1]?.focus();
-});
-
-// ─── Duration inputs ──────────────────────────────────────────────────────────
-[durH, durM, durS].forEach(el => {
-  el.addEventListener('focus', () => el.select());
-  el.addEventListener('blur',  () => { capField(el); persistConfig(); render(); });
-  el.addEventListener('input', () => { if (S.status === 'idle') render(); });
-});
-durH.addEventListener('keydown', e => { if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); durM.focus(); } });
-durM.addEventListener('keydown', e => { if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); durS.focus(); } });
-
-// ─── Controls ─────────────────────────────────────────────────────────────────
+// ─── Controls ───────────────────────────────────────────────────────────────
 function start() {
   unlockAudio();
   if (S.status === 'idle' || S.status === 'done') {
-    const total = configuredSeconds();
-    if (total === 0) return;
-    S.totalSeconds = total;
-    S.endTime = Date.now() + total * 1000;
-    S.announced = [];
+    const total = cfgSeconds(); if (total === 0) return;
+    S.totalSeconds = total; S.endTime = Date.now() + total * 1000; S.announced = [];
   } else if (S.status === 'paused') {
     S.endTime = Date.now() + S.pausedRemaining * 1000;
   }
-  S.status = 'running';
-  persistState(); render();
+  S.status = 'running'; writeStore(); paint();
 }
 function pause() {
   if (S.status !== 'running') return;
-  S.pausedRemaining = computeRemaining();
-  S.status = 'paused';
-  persistState(); render();
+  S.pausedRemaining = computeRemaining(); S.status = 'paused'; writeStore(); paint();
 }
 function reset() {
-  speechSynthesis.cancel();
-  S = { status: 'idle', endTime: 0, pausedRemaining: 0, totalSeconds: 0, announced: [] };
-  persistState(); render();
+  try { speechSynthesis.cancel(); } catch {}
+  S.status = 'idle'; S.endTime = 0; S.pausedRemaining = 0; S.totalSeconds = 0; S.announced = [];
+  syncFieldsFromState(); writeStore(); paint();
 }
-btnStart.addEventListener('click', () => { if (S.status === 'paused' || S.status === 'idle' || S.status === 'done') start(); });
+btnStart.addEventListener('click', start);
 btnPause.addEventListener('click', pause);
 btnReset.addEventListener('click', reset);
 
-// ─── The clock loop (250ms — responsive, self-correcting) ─────────────────────
-function loop() {
-  if (S.status === 'running') {
-    const remaining = computeRemaining();
-
-    // Fire any thresholds we've reached. Claim across windows so only ONE speaks.
-    reminders.forEach(rm => {
-      if (rm.enabled && rm.seconds < S.totalSeconds && remaining <= rm.seconds
-          && !S.announced.includes(rm.seconds)) {
-        const fresh = (rm.seconds - remaining) <= 3; // skip stale ones after a long sleep
-        if (claim(rm.seconds) && fresh) speak(announceLabel(rm.seconds));
-      }
-    });
-
-    if (remaining <= 0) {
-      S.status = 'done';
-      persistState();
-      if (claim('__alarm__')) fireAlarm();
-    }
-    render();
-  }
-}
-setInterval(loop, 250);
-
-/**
- * Atomically claim a milestone using localStorage as the shared ledger, so that
- * when both the main window and the popup are open, only one announces.
- * Returns true if THIS window won the claim.
- */
+// ─── Clock loop (drift-proof; single-speaker claim across windows) ────────────
 function claim(threshold) {
-  let latest = S;
-  try {
-    const raw = localStorage.getItem(K_STATE);
-    if (raw) latest = JSON.parse(raw);
-  } catch {}
+  const latest = readStore() || S;
   if (!Array.isArray(latest.announced)) latest.announced = [];
   if (latest.announced.includes(threshold)) { S.announced = latest.announced; return false; }
-  latest.announced.push(threshold);
-  S = Object.assign(S, latest);
-  persistState();
+  latest.announced.push(threshold); S.announced = latest.announced;
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(latest)); } catch {}
+  if (bc) bc.postMessage({ type: 'sync' });
   return true;
 }
+setInterval(() => {
+  if (S.status !== 'running') return;
+  const remaining = computeRemaining();
+  S.reminders.forEach(rm => {
+    if (rm.enabled && rm.seconds < S.totalSeconds && remaining <= rm.seconds && !S.announced.includes(rm.seconds)) {
+      const fresh = (rm.seconds - remaining) <= 3;
+      if (claim(rm.seconds) && fresh) speak(announceText(rm.seconds));
+    }
+  });
+  if (remaining <= 0) { S.status = 'done'; writeStore(); if (claim('__alarm__')) fireAlarm(); }
+  paint();
+}, 250);
 
-// ─── Speech ───────────────────────────────────────────────────────────────────
+// ─── Speech / audio ───────────────────────────────────────────────────────────
 let audioUnlocked = false;
 function unlockAudio() {
   if (audioUnlocked) return;
-  audioUnlocked = true;
-  audioNotice.classList.remove('show');
+  audioUnlocked = true; audioNotice.classList.remove('show');
   try { speechSynthesis.resume(); } catch {}
-  // Prime an AudioContext within the user gesture so the final alarm can play.
   try { window._actx = window._actx || new (window.AudioContext || window.webkitAudioContext)(); window._actx.resume(); } catch {}
 }
-document.addEventListener('pointerdown', unlockAudio, { once: false });
+document.addEventListener('pointerdown', unlockAudio);
 if (!IS_POPUP) audioNotice.classList.add('show');
 
 function populateVoices() {
-  const want = voiceSelect.value || voiceSelect.dataset.want || '';
+  const want = S.voice || '';
   voiceSelect.innerHTML = '<option value="">Default voice</option>';
-  speechSynthesis.getVoices().forEach(v => {
-    const opt = document.createElement('option');
-    opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
-    voiceSelect.appendChild(opt);
-  });
-  if (want && [...voiceSelect.options].some(o => o.value === want)) voiceSelect.value = want;
+  // English-only: announcements are always English, so only list English voices.
+  speechSynthesis.getVoices()
+    .filter(v => /^en\b|^en[-_]/i.test(v.lang))
+    .forEach(v => {
+      const opt = document.createElement('option'); opt.value = v.name; opt.textContent = `${v.name} (${v.lang})`;
+      voiceSelect.appendChild(opt);
+    });
+  const has = n => [...voiceSelect.options].some(o => o.value === n);
+  if (want && has(want)) voiceSelect.value = want;
+  else if (has(PREFERRED_VOICE)) { voiceSelect.value = PREFERRED_VOICE; S.voice = PREFERRED_VOICE; writeStore(); }
+  else { voiceSelect.value = ''; S.voice = ''; }
 }
 speechSynthesis.addEventListener('voiceschanged', populateVoices);
-voiceSelect.addEventListener('change', persistConfig);
+voiceSelect.addEventListener('change', () => { S.voice = voiceSelect.value; writeStore(); });
 
 function speak(text, onDone) {
   const ss = window.speechSynthesis;
   try { ss.resume(); ss.cancel(); } catch {}
   setTimeout(() => {
-    const utt  = new SpeechSynthesisUtterance(text);
+    const utt = new SpeechSynthesisUtterance(text);
     utt.rate = 0.95; utt.pitch = 1; utt.volume = 1;
-    const name = voiceSelect.value;
-    if (name) {
-      const voice = ss.getVoices().find(v => v.name === name);
-      if (voice) { utt.voice = voice; utt.lang = voice.lang; }
-    }
+    if (S.voice) { const v = ss.getVoices().find(x => x.name === S.voice); if (v) utt.voice = v; }
     utt.onend = utt.onerror = () => onDone && onDone();
     ss.speak(utt);
   }, 50);
 }
-
 testVoiceBtn.addEventListener('click', () => {
   unlockAudio();
-  testVoiceBtn.textContent = 'Speaking…';
-  testVoiceBtn.classList.add('speaking');
-  speak('5 minutes remaining', () => {
-    testVoiceBtn.textContent = 'Test voice';
-    testVoiceBtn.classList.remove('speaking');
-  });
+  testVoiceBtn.textContent = 'Speaking…'; testVoiceBtn.classList.add('speaking');
+  speak(announceText(300), () => { testVoiceBtn.textContent = 'Test voice'; testVoiceBtn.classList.remove('speaking'); });
 });
-
 function fireAlarm() {
   try {
     const ctx = window._actx || new (window.AudioContext || window.webkitAudioContext)();
     ctx.resume();
     const osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    osc.type = 'sine'; osc.frequency.value = 528;
-    gain.gain.setValueAtTime(0.5, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2);
-    osc.start(); osc.stop(ctx.currentTime + 2);
-  } catch {}
-}
-
-// ─── Pop-out + cross-window sync ──────────────────────────────────────────────
-if (IS_POPUP) {
-  document.body.classList.add('is-popup');
-} else {
-  document.getElementById('popout-btn').addEventListener('click', () => {
-    const w = 360, h = 300;
-    const left = Math.round(screen.width / 2 - w / 2);
-    const top  = Math.round(screen.height / 2 - h / 2);
-    window.open(location.pathname + '?popup=1', 'timer-popup',
-      `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=no,toolbar=no,menubar=no`);
-  });
-}
-
-function pullShared(which) {
-  if (which === 'config') { loadConfig(); renderReminders(); }
-  loadState();
-  render();
-}
-if (bc) bc.onmessage = (e) => pullShared(e.data && e.data.type);
-window.addEventListener('storage', (e) => {
-  if (e.key === K_STATE)  { loadState(); render(); }
-  if (e.key === K_REM || e.key === K_CONFIG) { loadConfig(); renderReminders(); render(); }
-});
-
-// ─── Init ─────────────────────────────────────────────────────────────────────
-loadConfig();
-loadState();
-populateVoices();
-renderReminders();
-render();
-</script>
-</body>
-</html>
+    osc.connect(gain); gain.connect(
